@@ -1,10 +1,15 @@
 {
   "manifest_version": 3,
   "name": "YouTube Focus",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Greys out YouTube's attention hooks, blurs thumbnails, asks why you're here, tracks your session, and greys other sites you choose.",
-  "permissions": ["storage", "scripting"],
-  "optional_host_permissions": ["https://*/*"],
+  "permissions": [
+    "storage",
+    "scripting"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -13,20 +18,29 @@
     "default_title": "YouTube Focus",
     "default_icon": {
       "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
       "48": "icons/icon48.png",
       "128": "icons/icon128.png"
     }
   },
   "icons": {
     "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   },
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_start"
     }
   ]
