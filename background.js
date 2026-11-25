@@ -23,7 +23,15 @@ async function syncGreySites() {
     enabled: true, greySitesOn: true, greySites: DEFAULT_SITES
   });
   try { await chrome.scripting.unregisterContentScripts({ ids: [SCRIPT_ID] }); } catch {}
-  const matches = s.enabled && s.greySitesOn ? toMatches(s.greySites || []) : [];
+  // Only register for sites the user has actually granted access to.
+  const granted = [];
+  if (s.enabled && s.greySitesOn) {
+    for (const d of s.greySites || []) {
+      const m = toMatches([d]);
+      if (m.length && await chrome.permissions.contains({ origins: m })) granted.push(...m);
+    }
+  }
+  const matches = granted;
   if (!matches.length) return;
   try {
     await chrome.scripting.registerContentScripts([{
@@ -40,6 +48,8 @@ async function syncGreySites() {
 }
 
 chrome.runtime.onInstalled.addListener(syncGreySites);
+chrome.permissions.onAdded.addListener(syncGreySites);
+chrome.permissions.onRemoved.addListener(syncGreySites);
 chrome.runtime.onStartup.addListener(syncGreySites);
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === 'sync' && ('enabled' in changes || 'greySitesOn' in changes || 'greySites' in changes)) {

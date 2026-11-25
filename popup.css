@@ -87,6 +87,12 @@ section { padding: 10px 16px 4px; }
   background: transparent; color: var(--muted); font-size: 13px; line-height: 1;
 }
 .chip button:hover { background: var(--border); color: var(--text); }
+.chip.pending { border-style: dashed; color: var(--muted); }
+.chip .allow {
+  width: auto; height: 20px; padding: 0 8px; border-radius: 999px;
+  background: var(--accent); color: var(--accent-ink); font: inherit; font-size: 11px; font-weight: 600;
+}
+.chip .allow:hover { background: #A3C4B2; color: var(--accent-ink); }
 .chips .empty { font-size: 12px; color: var(--faint); }
 .add { display: flex; gap: 6px; }
 .add input {

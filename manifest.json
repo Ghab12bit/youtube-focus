@@ -1,10 +1,10 @@
 {
   "manifest_version": 3,
   "name": "YouTube Focus",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Greys out YouTube's attention hooks, blurs thumbnails, asks why you're here, tracks your session, and greys other sites you choose.",
   "permissions": ["storage", "scripting"],
-  "host_permissions": ["<all_urls>"],
+  "optional_host_permissions": ["https://*/*"],
   "background": {
     "service_worker": "background.js"
   },

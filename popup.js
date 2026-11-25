@@ -11,7 +11,14 @@ function normalizeDomain(raw) {
   return /^[a-z0-9.-]+\.[a-z]{2,}$/.test(d) ? d : null;
 }
 
-function renderSites() {
+// Site access is optional and asked for one site at a time, only when the
+// user adds (or allows) that site. Nothing runs on a site without permission.
+const originsFor = (d) => [`https://${d}/*`, `https://*.${d}/*`];
+const hasAccess = (d) => chrome.permissions.contains({ origins: originsFor(d) });
+// Must be called directly inside a click/submit handler (user gesture).
+const askAccess = (d) => chrome.permissions.request({ origins: originsFor(d) });
+
+async function renderSites() {
   const list = document.getElementById('site-list');
   list.textContent = '';
   const sites = settings.greySites || [];
@@ -22,22 +29,36 @@ function renderSites() {
     list.append(e);
     return;
   }
-  sites.forEach((d) => {
+  for (const d of sites) {
+    const granted = await hasAccess(d);
     const chip = document.createElement('span');
-    chip.className = 'chip';
+    chip.className = 'chip' + (granted ? '' : ' pending');
     const label = document.createElement('span');
     label.textContent = d;
+    chip.append(label);
+    if (!granted) {
+      const allow = document.createElement('button');
+      allow.type = 'button';
+      allow.className = 'allow';
+      allow.title = `Allow greyscale on ${d}`;
+      allow.textContent = 'Allow';
+      allow.addEventListener('click', () => {
+        askAccess(d).then(() => renderSites());
+      });
+      chip.append(allow);
+    }
     const x = document.createElement('button');
     x.type = 'button';
     x.title = `Remove ${d}`;
     x.textContent = '×';
     x.addEventListener('click', () => {
       save('greySites', settings.greySites.filter((s) => s !== d));
+      chrome.permissions.remove({ origins: originsFor(d) }).catch(() => {});
       renderSites();
     });
-    chip.append(label, x);
+    chip.append(x);
     list.append(chip);
-  });
+  }
 }
 
 function initSites() {
@@ -50,9 +71,12 @@ function initSites() {
     if (!d) { err.textContent = 'Enter a domain like reddit.com'; err.hidden = false; return; }
     if (d === 'youtube.com') { err.textContent = 'YouTube is handled by the settings above'; err.hidden = false; return; }
     err.hidden = true;
+    // Save first (the popup can close when Chrome shows the permission
+    // prompt), then ask inside the same user gesture. A declined site stays
+    // in the list with an "Allow" button.
     if (!settings.greySites.includes(d)) save('greySites', [...settings.greySites, d]);
     input.value = '';
-    renderSites();
+    askAccess(d).finally(() => renderSites());
   });
   renderSites();
 }
