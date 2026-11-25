@@ -5,14 +5,16 @@
   const DEFAULTS = {
     enabled: true,   // master switch
     grey: true,      // 1. grey thumbnails
-    blur: true,      // 2. blur until hover (search + subscriptions)
+    blur: false,     // 2. blur until hover (search + subscriptions)
     mute: true,      // 3. mute red signals (logo, progress bar, badges)
-    pause: true,     // 4. "why are you here" screen
+    pause: false,    // 4. "why are you here" screen
     countdown: 5,    //    seconds
     timer: true,     // 5. session timer badge
-    limit: true,     // 6. soft limit
-    limitMin: 30     //    minutes
+    limit: false,    // 6. soft limit
+    limitMin: 30,    //    minutes
+    pausedUntil: 0   // "Pause 15m": everything off until this timestamp
   };
+  // Defaults = the Calm preset: visible effect, nothing that interrupts.
   const SESSION_GAP_MS = 30 * 60 * 1000; // 30 min away = new session
   const TICK_MS = 5000;
   const MAX_DELTA_MS = 15000;            // caps double-counting across tabs
@@ -27,6 +29,9 @@
   let pauseEl = null;
   let limitEl = null;
   let countdownTimer = null;
+
+  // Master switch, honouring a temporary pause
+  const isOn = () => !!settings.enabled && !(settings.pausedUntil > Date.now());
 
   const alive = () => { try { return !!chrome.runtime?.id; } catch { return false; } };
 
@@ -54,7 +59,7 @@
   function applyFavicon() {
     if (!document.head) return;
     applyingIcon = true;
-    const want = settings.enabled && settings.mute;
+    const want = isOn() && settings.mute;
     const links = document.head.querySelectorAll('link[rel~="icon"]');
     links.forEach((l) => {
       if (want) {
@@ -90,7 +95,7 @@
   }
 
   function applyAttrs() {
-    const on = settings.enabled;
+    const on = isOn();
     root.dataset.ytfOn = on ? 'on' : 'off';
     root.dataset.ytfGrey = on && settings.grey ? 'on' : 'off';
     root.dataset.ytfBlur = on && settings.blur ? 'on' : 'off';
@@ -141,9 +146,10 @@
     pauseEl.className = 'screen';
     pauseEl.innerHTML = `
       <form class="card" autocomplete="off">
-        <div class="eyebrow">YouTube Focus</div>
+        <div class="eyebrow">Unpull</div>
         <h1>What are you here for?</h1>
         <input class="field" maxlength="80" placeholder="e.g. Manifest V3 tutorial" />
+        <div class="chips" hidden></div>
         <div class="row">
           <span class="meta count"></span>
           <div class="actions">
@@ -151,7 +157,7 @@
             <button type="submit" class="btn primary go" disabled>Continue</button>
           </div>
         </div>
-        <p class="hint">Links you open directly skip this screen.</p>
+        <p class="hint">Links you open directly skip this screen. Turn it off from the toolbar menu any time.</p>
       </form>`;
     shadow.appendChild(pauseEl);
 
@@ -173,6 +179,25 @@
     }, 1000);
 
     input.addEventListener('input', update);
+
+    // Recent goals as one-click chips
+    const chips = pauseEl.querySelector('.chips');
+    chrome.storage.local.get({ recentGoals: [] }).then(({ recentGoals }) => {
+      if (!recentGoals.length || !pauseEl) return;
+      const k = document.createElement('span');
+      k.className = 'k';
+      k.textContent = 'Recent:';
+      chips.append(k);
+      recentGoals.slice(0, 3).forEach((g) => {
+        const b = document.createElement('button');
+        b.type = 'button';
+        b.textContent = g; // user text: never innerHTML
+        b.addEventListener('click', () => { input.value = g; update(); input.focus(); });
+        chips.append(b);
+      });
+      chips.hidden = false;
+    });
+
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
       const v = input.value.trim();
@@ -181,6 +206,10 @@
       if (expired(s)) s = newSession();
       s.intent = v;
       s.lastActive = Date.now();
+      const { recentGoals } = await chrome.storage.local.get({ recentGoals: [] });
+      await chrome.storage.local.set({
+        recentGoals: [v, ...recentGoals.filter((g) => g.toLowerCase() !== v.toLowerCase())].slice(0, 3)
+      });
       session = s;
       await saveSession(s);
       hidePause();
@@ -204,7 +233,7 @@
   }
 
   function maybeShowPause() {
-    const eligible = settings.enabled && settings.pause && session &&
+    const eligible = isOn() && settings.pause && session &&
       !session.intent && PAUSE_PAGES.includes(pageType());
     if (eligible) showPause();
     else hidePause();
@@ -218,7 +247,7 @@
     const mins = Math.round(session.activeMs / 60000);
     limitEl.innerHTML = `
       <div class="card">
-        <div class="eyebrow">YouTube Focus</div>
+        <div class="eyebrow">Unpull</div>
         <h1>${mins} minutes on YouTube</h1>
         <p class="body"></p>
         <div class="row end">
@@ -262,7 +291,7 @@
   }
 
   function checkLimit() {
-    const over = settings.enabled && settings.limit && session && !pauseEl &&
+    const over = isOn() && settings.limit && session && !pauseEl &&
       session.activeMs >= limitMs();
     if (over) showLimit();
     else hideLimit();
@@ -270,7 +299,7 @@
 
   // ---------- 5. Session timer badge ----------
   function renderBadge() {
-    const show = settings.enabled && settings.timer && session && !pauseEl && !limitEl;
+    const show = isOn() && settings.timer && session && !pauseEl && !limitEl;
     badge.hidden = !show;
     if (!show) return;
     const mins = Math.floor(session.activeMs / 60000);
@@ -297,12 +326,37 @@
     if (expired(s)) {
       s = newSession();
     } else {
-      s.activeMs += Math.min(Math.max(0, now - s.lastActive), MAX_DELTA_MS);
+      const delta = Math.min(Math.max(0, now - s.lastActive), MAX_DELTA_MS);
+      s.activeMs += delta;
       s.lastActive = now;
+      recordUsage(delta);
     }
     session = s;
     await saveSession(s);
     refresh();
+  }
+
+  // Weekly totals (for the popup summary) and active days (for the review link).
+  // Stored only on this device.
+  const localDay = (d) => {
+    const x = new Date(d);
+    return `${x.getFullYear()}-${String(x.getMonth() + 1).padStart(2, '0')}-${String(x.getDate()).padStart(2, '0')}`;
+  };
+  const weekKey = (d) => {
+    const m = new Date(d); m.setHours(0, 0, 0, 0);
+    m.setDate(m.getDate() - ((m.getDay() + 6) % 7)); // Monday
+    return localDay(m);
+  };
+  async function recordUsage(ms) {
+    if (!ms) return;
+    const now = Date.now();
+    const { weeks = {}, days = [] } = await chrome.storage.local.get(['weeks', 'days']);
+    const wk = weekKey(now);
+    weeks[wk] = (weeks[wk] || 0) + ms;
+    for (const k of Object.keys(weeks).sort().slice(0, -8)) delete weeks[k]; // keep 8 weeks
+    const day = localDay(now);
+    if (!days.includes(day)) days.push(day);
+    await chrome.storage.local.set({ weeks, days: days.slice(-30) });
   }
 
   function onNav() {
@@ -314,6 +368,8 @@
   async function init() {
     settings = await getSettings();
     applyAttrs();
+    // After an update, an old copy's UI may still be on the page: replace it.
+    document.querySelectorAll('ytf-host').forEach((el) => el.remove());
     root.appendChild(host);
     watchFavicon();
 
@@ -396,6 +452,13 @@
       .ghost { background: transparent; color: #BDBDBD; border-color: #2A2A2A; }
       .ghost:hover { background: #1C1C1C; }
       .hint { font-size: 12px; color: #5C5C5C; margin: 28px 0 0; }
+      .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
+      .chips .k { font-size: 13px; color: #5C5C5C; }
+      .chips button {
+        font: inherit; font-size: 13px; color: #BDBDBD; background: transparent; cursor: pointer;
+        border: 1px solid #2A2A2A; border-radius: 999px; padding: 6px 12px;
+      }
+      .chips button:hover { border-color: #8FB3A0; color: #EDEDED; }
       #badge {
         position: fixed; right: 16px; bottom: 16px; pointer-events: auto;
         max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;

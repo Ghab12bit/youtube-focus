@@ -1,10 +1,12 @@
-# YouTube Focus
+# Unpull
 
-A Chrome extension that removes YouTube's attention hooks and adds a little friction before you start watching.
+A Chrome extension that takes the pull out of YouTube: grey thumbnails, quiet red alerts, blur until hover, and a pause before you scroll. It can also grey out X, LinkedIn or any site you choose.
+
+*Unpull is not affiliated with Google or YouTube.*
 
 ## Features
 
-Every feature has its own switch in the popup, plus a master switch that turns them all off.
+Pick a preset (**Calm**, **Strict** or **Off**) or set each switch yourself. Pause everything for 15 minutes, or toggle it with `Alt+Shift+U`. The toolbar badge shows OFF or II (paused) so you always know its state.
 
 **Look**
 - **Grey thumbnails.** Takes the colour pull out of every thumbnail, so you pick videos by title and channel.
@@ -19,7 +21,12 @@ Every feature has its own switch in the popup, plus a master switch that turns t
 - **Timer badge.** Shows your active time this session and your goal in the bottom-right corner.
 
 **Other sites**
-- **Whole-page greyscale** on any site you add. X and LinkedIn are on the list by default.
+- **Whole-page greyscale** on any site you add. X and LinkedIn are on the list by default; Chrome asks you to allow each site once, and the extension can't touch any site you haven't allowed.
+
+**Also**
+- A welcome page on install, and open YouTube tabs update straight away with no reload.
+- Your last three goals as one-click chips on the pause screen.
+- A weekly time summary in the popup. Everything is stored only on your device.
 
 ## Install (developer mode)
 

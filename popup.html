@@ -6,25 +6,38 @@
 </head>
 <body>
   <header>
-    <div>
-      <div class="title">YouTube Focus</div>
-      <div class="sub" id="status">Active</div>
+    <img class="logo" src="icons/icon32.png" alt="" />
+    <div class="grow">
+      <div class="title">Unpull</div>
+      <div class="status" id="status">On</div>
     </div>
-    <label class="switch big" title="Turn everything on or off">
-      <input type="checkbox" data-key="enabled" />
+    <button type="button" id="pause15" class="ghost">Pause 15m</button>
+    <label class="switch big" title="Turn everything on or off (Alt+Shift+U)">
+      <input type="checkbox" id="master" />
       <span></span>
     </label>
   </header>
 
+  <div id="pausedbox" class="pausedbox" hidden></div>
+
   <main id="features">
+    <div class="presets">
+      <div class="seg" role="radiogroup" aria-label="Preset">
+        <button type="button" data-preset="calm">Calm</button>
+        <button type="button" data-preset="strict">Strict</button>
+        <button type="button" data-preset="off">Off</button>
+      </div>
+      <div class="seghint" id="seghint"></div>
+    </div>
+
     <section>
       <div class="label">Look</div>
       <div class="item">
-        <div><div class="name">Grey thumbnails</div><div class="hint">Removes colour pull everywhere</div></div>
+        <div><div class="name">Grey thumbnails</div></div>
         <label class="switch"><input type="checkbox" data-key="grey" /><span></span></label>
       </div>
       <div class="item">
-        <div><div class="name">Blur until hover</div><div class="hint">Search and Subscriptions only</div></div>
+        <div><div class="name">Blur until hover</div><div class="hint">Search and Subscriptions</div></div>
         <label class="switch"><input type="checkbox" data-key="blur" /><span></span></label>
       </div>
       <div class="item">
@@ -55,35 +68,46 @@
           <button type="button" class="minus">&minus;</button><span class="val"></span><button type="button" class="plus">+</button>
         </div>
       </div>
+      <div class="item">
+        <div><div class="name">Timer badge</div><div class="hint">Bottom-right corner of YouTube</div></div>
+        <label class="switch"><input type="checkbox" data-key="timer" /><span></span></label>
+      </div>
     </section>
 
     <section>
-      <div class="label">Session</div>
-      <div class="item">
-        <div><div class="name">Timer badge</div><div class="hint">Bottom-right corner</div></div>
-        <label class="switch"><input type="checkbox" data-key="timer" /><span></span></label>
-      </div>
-      <div class="session">
-        <div class="stat"><span class="k">Here for</span><span class="v" id="intent">Not set</span></div>
-        <div class="stat"><span class="k">Active time</span><span class="v" id="time">0 min</span></div>
-        <button type="button" id="end" class="end">End session</button>
-      </div>
+      <details id="others">
+        <summary>
+          <span class="label inline">Other sites</span>
+          <span class="sum" id="others-sum"></span>
+          <span class="chev">&#9662;</span>
+        </summary>
+        <div class="item">
+          <div><div class="name">Greyscale other sites</div><div class="hint">Whole page, like phone grayscale</div></div>
+          <label class="switch"><input type="checkbox" data-key="greySitesOn" /><span></span></label>
+        </div>
+        <div class="sites" data-depends="greySitesOn">
+          <div id="site-list" class="chips"></div>
+          <form id="site-form" class="add" autocomplete="off">
+            <input id="site-input" placeholder="Add a site, e.g. reddit.com" />
+            <button type="submit">Add</button>
+          </form>
+          <div id="site-error" class="error" hidden></div>
+          <p class="note" id="allow-note" hidden>Dashed sites need one click on Allow. Chrome then asks for access to that site only.</p>
+        </div>
+      </details>
     </section>
-    <section>
-      <div class="label">Other sites</div>
-      <div class="item">
-        <div><div class="name">Greyscale other sites</div><div class="hint">Whole page, like phone grayscale</div></div>
-        <label class="switch"><input type="checkbox" data-key="greySitesOn" /><span></span></label>
-      </div>
-      <div class="sites" data-depends="greySitesOn">
-        <div id="site-list" class="chips"></div>
-        <form id="site-form" class="add" autocomplete="off">
-          <input id="site-input" placeholder="Add a site, e.g. reddit.com" />
-          <button type="submit">Add</button>
-        </form>
-        <div id="site-error" class="error" hidden></div>
-      </div>
-    </section>
+
+    <div class="card">
+      <div class="stat"><span class="k">Here for</span><span class="v" id="intent">Not set</span></div>
+      <div class="stat"><span class="k">This session</span><span class="v" id="time">0 min</span></div>
+      <div class="week" id="week"></div>
+      <button type="button" id="end" class="end">End session</button>
+    </div>
+
+    <div class="nudge" id="nudge" hidden>
+      <span>Finding Unpull useful?</span>
+      <span><a id="review" href="#" target="_blank" rel="noopener">Leave a review</a><button type="button" id="nudge-x" title="Don't show again">&times;</button></span>
+    </div>
   </main>
 
   <script src="popup.js"></script>

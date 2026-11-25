@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Welcome to Unpull</title>
+  <link rel="icon" href="icons/icon32.png" />
+  <link rel="stylesheet" href="welcome.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="top">
+      <img class="logo" src="icons/icon32.png" alt="" />Unpull
+      <span class="ok">&#10003; Installed and running on YouTube</span>
+    </div>
+
+    <h1>YouTube, without<br />the pull.</h1>
+    <p class="lead">Thumbnails go grey, red alerts go quiet, and you choose what to watch instead of being pulled into it.</p>
+
+    <div class="ba" id="ba">
+      <div class="feed colour" aria-hidden="true"></div>
+      <div class="feed grey" id="grey" aria-hidden="true"></div>
+      <div class="handle" id="handle"><b>&#8646;</b></div>
+      <span class="tag a">Before</span><span class="tag b">With Unpull</span>
+    </div>
+    <p class="drag">Drag the handle to compare</p>
+
+    <div class="steps">
+      <div class="box">
+        <div class="n">Step 1</div>
+        <h3>Pin it to your toolbar</h3>
+        <p class="p" id="pin-text">Click the puzzle icon at the top right of Chrome, then the pin next to Unpull. One click turns everything on or off. Shortcut: <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>U</kbd>.</p>
+        <div class="bar"><span></span><span></span><img class="me" src="icons/icon32.png" alt="" /><span class="pz">&#10697;</span></div>
+        <p class="pinned" id="pinned" hidden>&#10003; Pinned. Nice.</p>
+      </div>
+      <div class="box">
+        <div class="n">Step 2</div>
+        <h3>Pick how strict you want it</h3>
+        <p class="p">You can change this any time from the toolbar.</p>
+        <div class="cards">
+          <button type="button" class="pc" data-preset="calm"><b>Calm</b><span class="rec">RECOMMENDED</span><span class="d">Grey thumbnails, quiet red alerts. Nothing interrupts you.</span></button>
+          <button type="button" class="pc" data-preset="strict"><b>Strict</b><span class="d">Adds blur, a "why are you here?" pause and a 30 minute limit.</span></button>
+          <button type="button" class="pc" data-preset="off"><b>Off</b><span class="d">Normal YouTube. Your settings are kept.</span></button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cta">
+      <a class="btn" href="https://www.youtube.com/" target="_blank" rel="noopener">Open YouTube &rarr;</a>
+      <span class="sub">Your open YouTube tabs have already been updated. No reload needed.</span>
+    </div>
+    <p class="foot">Unpull is not affiliated with Google or YouTube. Your settings stay on your device.</p>
+  </div>
+  <script src="welcome.js"></script>
+</body>
+</html>
