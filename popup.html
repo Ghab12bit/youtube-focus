@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <div class="title">YouTube Focus</div>
+      <div class="sub" id="status">Active</div>
+    </div>
+    <label class="switch big" title="Turn everything on or off">
+      <input type="checkbox" data-key="enabled" />
+      <span></span>
+    </label>
+  </header>
+
+  <main id="features">
+    <section>
+      <div class="label">Look</div>
+      <div class="item">
+        <div><div class="name">Grey thumbnails</div><div class="hint">Removes colour pull everywhere</div></div>
+        <label class="switch"><input type="checkbox" data-key="grey" /><span></span></label>
+      </div>
+      <div class="item">
+        <div><div class="name">Blur until hover</div><div class="hint">Search and Subscriptions only</div></div>
+        <label class="switch"><input type="checkbox" data-key="blur" /><span></span></label>
+      </div>
+      <div class="item">
+        <div><div class="name">Mute red signals</div><div class="hint">Tab icon, logo, progress bar, badges</div></div>
+        <label class="switch"><input type="checkbox" data-key="mute" /><span></span></label>
+      </div>
+    </section>
+
+    <section>
+      <div class="label">Friction</div>
+      <div class="item">
+        <div><div class="name">"Why are you here?"</div><div class="hint">Once per session, on Home and Search</div></div>
+        <label class="switch"><input type="checkbox" data-key="pause" /><span></span></label>
+      </div>
+      <div class="item sub-item" data-depends="pause">
+        <div class="name">Countdown</div>
+        <div class="stepper" data-key="countdown" data-min="0" data-max="15" data-step="1" data-unit="s">
+          <button type="button" class="minus">&minus;</button><span class="val"></span><button type="button" class="plus">+</button>
+        </div>
+      </div>
+      <div class="item">
+        <div><div class="name">Soft limit</div><div class="hint">Greys the page and asks if you're done</div></div>
+        <label class="switch"><input type="checkbox" data-key="limit" /><span></span></label>
+      </div>
+      <div class="item sub-item" data-depends="limit">
+        <div class="name">Limit</div>
+        <div class="stepper" data-key="limitMin" data-min="5" data-max="180" data-step="5" data-unit=" min">
+          <button type="button" class="minus">&minus;</button><span class="val"></span><button type="button" class="plus">+</button>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="label">Session</div>
+      <div class="item">
+        <div><div class="name">Timer badge</div><div class="hint">Bottom-right corner</div></div>
+        <label class="switch"><input type="checkbox" data-key="timer" /><span></span></label>
+      </div>
+      <div class="session">
+        <div class="stat"><span class="k">Here for</span><span class="v" id="intent">Not set</span></div>
+        <div class="stat"><span class="k">Active time</span><span class="v" id="time">0 min</span></div>
+        <button type="button" id="end" class="end">End session</button>
+      </div>
+    </section>
+    <section>
+      <div class="label">Other sites</div>
+      <div class="item">
+        <div><div class="name">Greyscale other sites</div><div class="hint">Whole page, like phone grayscale</div></div>
+        <label class="switch"><input type="checkbox" data-key="greySitesOn" /><span></span></label>
+      </div>
+      <div class="sites" data-depends="greySitesOn">
+        <div id="site-list" class="chips"></div>
+        <form id="site-form" class="add" autocomplete="off">
+          <input id="site-input" placeholder="Add a site, e.g. reddit.com" />
+          <button type="submit">Add</button>
+        </form>
+        <div id="site-error" class="error" hidden></div>
+      </div>
+    </section>
+  </main>
+
+  <script src="popup.js"></script>
+</body>
+</html>

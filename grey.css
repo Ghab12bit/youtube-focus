@@ -1,0 +1,6 @@
+/* Whole-page greyscale for sites in the "Other sites" list.
+   Injected at document_start, so there is no flash of colour.
+   A filter on the root element does not break position: fixed layouts. */
+html:not([data-ytf-site-off]) {
+  filter: grayscale(1) !important;
+}

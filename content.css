@@ -1,0 +1,63 @@
+/* YouTube Focus: page-level rules.
+   content.js sets data-ytf-* attributes on <html>; every rule keys off them,
+   so each toggle in the popup switches its rule on or off live. */
+
+/* ---------- 1 + 2. Grey thumbnails and blur until hover ----------
+   One filter per image, driven by two variables, so grey and blur
+   can be toggled independently without overriding each other. */
+html { --ytf-g: 0; --ytf-b: 0px; }
+html[data-ytf-grey="on"] { --ytf-g: 1; }
+
+/* Blur only where you browse lists of strangers' videos: search + subscriptions */
+html[data-ytf-blur="on"][data-ytf-page="search"],
+html[data-ytf-blur="on"][data-ytf-page="subs"] { --ytf-b: 14px; }
+
+/* Hovering a result un-blurs it (it stays grey) */
+:is(ytd-video-renderer, ytd-rich-item-renderer, ytd-grid-video-renderer,
+    ytd-playlist-renderer, ytd-radio-renderer, ytd-reel-item-renderer,
+    ytd-compact-video-renderer, yt-lockup-view-model, ytd-video-preview):hover,
+ytd-video-preview { --ytf-b: 0px; }
+
+html[data-ytf-on="on"] :is(ytd-thumbnail, ytd-playlist-thumbnail,
+    yt-thumbnail-view-model, yt-collection-thumbnail-view-model,
+    ytm-shorts-lockup-view-model, ytd-video-preview) :is(img, video),
+html[data-ytf-on="on"] :is(.ytp-videowall-still-image, .ytp-ce-covering-image) {
+  filter: grayscale(var(--ytf-g)) blur(var(--ytf-b)) !important;
+  transition: filter 0.15s ease;
+}
+
+/* ---------- 3. Mute the red signals ---------- */
+/* Logo + top bar (this is your original red-icon greying) */
+html[data-ytf-mute="on"] :is(ytd-masthead #logo, ytd-topbar-logo-renderer, #logo-icon) {
+  filter: grayscale(1) !important;
+}
+/* Player progress bar, scrubber, controls */
+html[data-ytf-mute="on"] .ytp-chrome-bottom {
+  filter: grayscale(1);
+}
+/* "Watched" bars on thumbnails, LIVE badges */
+html[data-ytf-mute="on"] :is(ytd-thumbnail-overlay-resume-playback-renderer,
+    yt-thumbnail-overlay-progress-bar-view-model,
+    .ytThumbnailOverlayProgressBarHost,
+    .badge-style-type-live-now, .badge-style-type-live-now-alternate,
+    .yt-badge-shape--thumbnail-live,
+    ytd-thumbnail-overlay-time-status-renderer[overlay-style="LIVE"]) {
+  filter: grayscale(1) !important;
+}
+/* Sidebar: red YouTube Premium / Music / Kids / Labs icons */
+html[data-ytf-mute="on"] :is(#guide, ytd-guide-renderer, ytd-mini-guide-renderer, tp-yt-app-drawer) :is(yt-icon, img, .yt-spec-avatar-shape) {
+  filter: grayscale(1) !important;
+}
+/* Notification count + unread dots: hidden, not greyed */
+html[data-ytf-mute="on"] :is(.yt-spec-icon-badge-shape__badge, #notification-count, #newness-dot) {
+  display: none !important;
+}
+
+/* ---------- 4 + 6. Overlays ---------- */
+html[data-ytf-lock="on"],
+html[data-ytf-lock="on"] body { overflow: hidden !important; }
+
+html[data-ytf-limit="on"] body {
+  filter: grayscale(1) brightness(0.55);
+  transition: filter 0.6s ease;
+}
