@@ -1,12 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Unpull: Grayscale & Blur YouTube Thumbnails, Focus Mode",
+  "name": "Unpull: Blur YouTube Thumbnails, Grayscale & Focus Mode",
   "short_name": "Unpull",
   "version": "3.0.0",
-  "description": "Grey out YouTube thumbnails, mute red alerts, blur search results and pause before you scroll. Also greys X, LinkedIn or any site.",
-  "permissions": ["storage", "scripting", "alarms"],
-  "host_permissions": ["https://www.youtube.com/*", "https://youtube.com/*"],
-  "optional_host_permissions": ["https://*/*"],
+  "description": "Grey out and blur YouTube thumbnails, mute red alerts, and pause before you scroll. Works on X and LinkedIn too. Free, no tracking.",
+  "permissions": [
+    "storage",
+    "scripting",
+    "alarms"
+  ],
+  "host_permissions": [
+    "https://www.youtube.com/*",
+    "https://youtube.com/*"
+  ],
+  "optional_host_permissions": [
+    "https://*/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
@@ -28,15 +37,25 @@
   },
   "commands": {
     "toggle-unpull": {
-      "suggested_key": { "default": "Alt+Shift+U", "mac": "Alt+Shift+U" },
+      "suggested_key": {
+        "default": "Alt+Shift+U",
+        "mac": "Alt+Shift+U"
+      },
       "description": "Turn Unpull on or off"
     }
   },
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com/*", "https://youtube.com/*"],
-      "js": ["content.js"],
-      "css": ["content.css"],
+      "matches": [
+        "https://www.youtube.com/*",
+        "https://youtube.com/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "css": [
+        "content.css"
+      ],
       "run_at": "document_start"
     }
   ]
