@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Unpull: Blur YouTube Thumbnails, Grayscale & Focus Mode",
   "short_name": "Unpull",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "description": "Grey out and blur YouTube thumbnails, mute red alerts, and pause before you scroll. Works on X and LinkedIn too. Free, no tracking.",
   "permissions": [
     "storage",
